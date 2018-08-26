@@ -13,6 +13,7 @@ def main(event, context):
     if params.get("version") == 0:
         result = elastic_search.get(params)
     elif params.get("version") == 1:
+        params['size'] = params['size'] / 2.0
         result = elastic_search.get_by_graphapi(params)
     elif params.get("version") == 2:
         result = elastic_search.get_by_significant_term(params)
@@ -23,4 +24,3 @@ def main(event, context):
     }
 
     return response
-
