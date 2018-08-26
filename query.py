@@ -24,3 +24,79 @@ def get(params):
         ]
     }
     return query
+
+def get_by_graphapi(params):
+    query = {
+        "query": {
+            "bool": {
+              "must": [
+                ', '.join( ['{ "match" : { "keywords_tag" : "' + i + '" } }' for i in params.get('tag') ] )
+              ]
+            }
+        },
+        "controls": {
+            "use_significance": True,
+            "sample_size": 75001,
+            "timeout": 5000
+        },
+        "connections": {
+              "query" : {
+                "bool": {
+                    "filter": [
+                       {
+                          "range": {
+                             "start_date.min_date": {
+                                "gte": params.get('date')
+                             }
+                          }
+                       }
+                    ]
+                 }
+              },
+                "vertices": [
+                    {
+                        "field": "keywords_tag",
+                        "size": params.get('size'),
+                        "min_doc_count": params.get('min_doc_count'),
+                        "exclude" : [
+                          ", ".join( i for i in params.get("tag"))
+                        ]
+                    }
+                ]
+        },
+        "vertices": [
+            {
+                "field": "keywords_tag",
+                "size": params.get('size'),
+                "min_doc_count": params.get('min_doc_count'),
+                "exclude" : [
+                      ", ".join( i for i in params.get("tag"))
+                ]
+            }
+        ]
+    }
+    
+    return query
+
+def get_by_agg_signicant_terms(params):
+    query = {
+      "size": 0, 
+        "query" : {
+          "bool": {
+            "must": [
+              ', '.join( ['{ "match" : { "keywords_tag" : "' + i + '" } }' for i in params.get('tag') ] )
+            ]
+          }
+        },
+        "aggregations" : {
+            "significant_related_word" : {
+                "significant_terms" : { 
+                  "field" : "keywords_tag",
+                  "exclude": [ 
+                        ", ".join( i for i in params.get("tag"))
+                    ]
+                  }
+            }
+        }
+    }
+    return query
