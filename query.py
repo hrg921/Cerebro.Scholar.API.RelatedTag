@@ -1,7 +1,6 @@
 """
 Created by hangeonho on 2018. 8. 22..
 """
-import ast
 
 def get(params):
     query = {
@@ -31,50 +30,50 @@ def get_by_graphapi(params):
     "date" : papers starting from params['date']
     "min_doc_count" : The minimum frequency of keywords in the entire document.
   """
-    query = {
-        "query": {
-            "bool": {
-              "must":
-                list(ast.literal_eval(', '.join( [ str({ "match" : { "keywords_tag" :  i  } }) for i in params.get('tag') ] )))
-            }
-        },
-        "controls": {
-            "sample_size": 75001,
-            "timeout": 5000
-        },
-        "connections": {
-              "query" : {
-                "bool": {
-                  "filter": [
-                   {
-                    "range": {
-                       "start_date.min_date": {
-                          "gte": params.get('date')
-                       }
-                    }
-                   }
-                  ]
+  query = {
+      "query": {
+          "bool": {
+            "must":
+              [ {"match" : { "keywords_tag" : i } } for i in params['tag'] ]
+          }
+      },
+      "controls": {
+          "sample_size": 75001, # params['samplesize']
+          "timeout": 5000
+      },
+      "connections": {
+            "query" : {
+              "bool": {
+                "filter": [
+                 {
+                  "range": {
+                     "start_date.min_date": {
+                        "gte": params.get('date')
+                     }
+                  }
                  }
-              },
-                "vertices": [
-                    {
-                        "field": "keywords_tag",
-                        "size": params.get('size', 8),
-                        "min_doc_count": params.get('min_doc_count'),
-                        "exclude" : params.get('tag')
-                    }
                 ]
-        },
-        "vertices": [
-            {
-                "field": "keywords_tag",
-                "size": params.get('size', 8),
-                "min_doc_count": params.get('min_doc_count'),
-                "exclude" : params.get('tag')
-            }
-        ]
-    }
-    return query
+               }
+            },
+              "vertices": [
+                  {
+                      "field": "keywords_tag",
+                      "size": params.get('size', 8),
+                      "min_doc_count": params.get('min_doc_count'),
+                      "exclude" : params.get('tag')
+                  }
+              ]
+      },
+      "vertices": [
+          {
+              "field": "keywords_tag",
+              "size": params.get('size', 8),
+              "min_doc_count": params.get('min_doc_count'),
+              "exclude" : params.get('tag')
+          }
+      ]
+  }
+  return query
 
 def get_by_agg_signicant_terms(params):
     query = {
@@ -82,7 +81,7 @@ def get_by_agg_signicant_terms(params):
         "query" : {
           "bool": {
             "must": 
-              list(ast.literal_eval(', '.join( [ str({ "match" : { "keywords_tag" :  i  } }) for i in params.get('tag') ] )))
+              [ {"match" : { "keywords_tag" : i } } for i in params['tag'] ]
           }
         },
         "aggregations" : {
